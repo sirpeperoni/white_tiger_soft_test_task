@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\DTO\LoginDto;
@@ -22,7 +24,7 @@ class AuthService
             throw new AuthException('Неверный email или пароль.');
         }
 
-        return $user->createToken('auth_token')->plainTextToken;
+        return $user->createToken('auth_token', ['*'], now()->addMinutes(config('sanctum.expiration')))->plainTextToken;
     }
 
     public function register(RegisterDto $dto): string
@@ -33,6 +35,6 @@ class AuthService
             'password' => Hash::make($dto->password),
         ]);
 
-        return $user->createToken('auth_token')->plainTextToken;
+        return $user->createToken('auth_token', ['*'], now()->addMinutes(config('sanctum.expiration')))->plainTextToken;
     }
 }

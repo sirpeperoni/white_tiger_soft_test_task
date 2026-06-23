@@ -11,6 +11,8 @@ use App\Orchid\Screens\Examples\ExampleGridScreen;
 use App\Orchid\Screens\Examples\ExampleLayoutsScreen;
 use App\Orchid\Screens\Examples\ExampleScreen;
 use App\Orchid\Screens\Examples\ExampleTextEditorsScreen;
+use App\Orchid\Screens\Post\PostEditScreen;
+use App\Orchid\Screens\Post\PostListScreen;
 use App\Orchid\Screens\PlatformScreen;
 use App\Orchid\Screens\Role\RoleEditScreen;
 use App\Orchid\Screens\Role\RoleListScreen;
@@ -83,6 +85,25 @@ Route::screen('roles', RoleListScreen::class)
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
         ->push(__('Roles'), route('platform.systems.roles')));
+
+// Platform > Posts
+Route::screen('posts/{post}/edit', PostEditScreen::class)
+    ->name('platform.posts.edit')
+    ->breadcrumbs(fn (Trail $trail, $post) => $trail
+        ->parent('platform.posts')
+        ->push($post->title, route('platform.posts.edit', $post)));
+
+Route::screen('posts/create', PostEditScreen::class)
+    ->name('platform.posts.create')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.posts')
+        ->push('Создать', route('platform.posts.create')));
+
+Route::screen('posts', PostListScreen::class)
+    ->name('platform.posts')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.index')
+        ->push('Публикации', route('platform.posts')));
 
 // Example...
 Route::screen('example', ExampleScreen::class)

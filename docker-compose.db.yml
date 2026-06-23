@@ -1,20 +1,4 @@
 services:
-  app:
-    build: .
-    container_name: orchid_app
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    environment:
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: laravel
-      DB_USERNAME: laravel
-      DB_PASSWORD: secret
-    depends_on:
-      mysql:
-        condition: service_healthy
-
   mysql:
     image: mysql:8.0
     container_name: orchid_mysql

@@ -1,58 +1,205 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# API и Админка для мобильного приложения «Блог»
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+REST API на Laravel 13 + административная панель на Orchid.
 
-## About Laravel
+## Стек
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.5 / Laravel 13
+- MySQL 8.0
+- Laravel Sanctum (токен-аутентификация)
+- Laravel Orchid (административная панель)
+- Docker (для базы данных или для всего проекта)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Локальный запуск
 
-## Learning Laravel
+### Требования
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.5+
+- Composer
+- Docker
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 1. Запустить базу данных
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+docker-compose -f docker-compose.db.yml up -d
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+MySQL будет доступен на `localhost:3307`.
 
-## Contributing
+### 2. Установить зависимости
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+composer install
+```
 
-## Code of Conduct
+### 3. Настроить окружение
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Security Vulnerabilities
+Убедитесь, что в `.env` указаны следующие параметры подключения к БД:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3307
+DB_DATABASE=laravel
+DB_USERNAME=laravel
+DB_PASSWORD=secret
+```
 
-## License
+### 4. Выполнить миграции
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan migrate
+```
+
+### 5. Запустить сервер
+
+```bash
+php artisan serve
+```
+
+Приложение доступно на http://localhost:8000
+
+---
+
+## Запуск полностью в Docker
+
+Если нужно запустить всё (приложение + БД) в контейнерах:
+
+```bash
+docker-compose up --build
+```
+
+---
+
+## Административная панель
+
+URL: http://localhost:8000/admin
+
+Вход по email и паролю. Доступ только для пользователей с правами администратора.
+
+### Создание администратора
+
+```bash
+php artisan orchid:admin admin admin@example.com password
+```
+
+### Возможности
+
+- **Пользователи** — просмотр, создание, редактирование, удаление
+- **Публикации** — просмотр, создание, редактирование, удаление
+- **Роли и права** — управление доступом
+
+---
+
+## API
+
+Базовый URL: `http://localhost:8000/api`
+
+Все ответы в формате JSON.
+
+### Авторизация
+
+#### Регистрация
+```
+POST /api/auth/register
+Content-Type: application/json
+
+{
+    "name": "Иван Иванов",
+    "email": "ivan@example.com",
+    "password": "password123"
+}
+```
+
+Ответ `201`:
+```json
+{
+    "accessToken": "1|abc123..."
+}
+```
+
+#### Вход
+```
+POST /api/auth/login
+Content-Type: application/json
+
+{
+    "email": "ivan@example.com",
+    "password": "password123"
+}
+```
+
+Ответ `200`:
+```json
+{
+    "accessToken": "1|abc123..."
+}
+```
+
+---
+
+### Публикации
+
+Все запросы требуют заголовок:
+```
+Authorization: Bearer <accessToken>
+```
+
+#### Создать публикацию
+```
+POST /api/posts
+Content-Type: application/json
+
+{
+    "title": "Заголовок",
+    "text": "Текст публикации"
+}
+```
+
+#### Все публикации
+```
+GET /api/posts?limit=10&offset=0&sort_by=date&sort_order=desc&date_from=2024-01-01&date_to=2024-12-31
+```
+
+| Параметр | Тип | По умолчанию | Описание |
+|---|---|---|---|
+| `limit` | int | 10 | Кол-во записей (макс. 100) |
+| `offset` | int | 0 | Сколько записей пропустить |
+| `sort_by` | string | `date` | Сортировка: `date` или `title` |
+| `sort_order` | string | `desc` | Порядок: `asc` или `desc` |
+| `date_from` | date | — | Фильтр от даты |
+| `date_to` | date | — | Фильтр до даты |
+
+#### Мои публикации
+```
+GET /api/posts/my?limit=10&offset=0
+```
+
+Те же параметры фильтрации и сортировки.
+
+---
+
+## Структура проекта
+
+```
+app/
+├── DTO/                        # Data Transfer Objects
+├── Exceptions/                 # AuthException
+├── Http/
+│   ├── Controllers/Api/        # Тонкие контроллеры
+│   ├── Requests/Api/           # Валидация + toDto()
+│   ├── Requests/Admin/         # Валидация форм Orchid
+│   └── Resources/              # JSON-сериализация
+├── Models/                     # User, Post
+├── Orchid/
+│   ├── Layouts/Post/           # Таблица и форма публикаций
+│   └── Screens/Post/           # Экраны управления публикациями
+└── Services/                   # AuthService, PostService
+```
