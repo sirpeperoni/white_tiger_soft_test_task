@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Orchid\Layouts\Post;
 
 use App\Models\Post;
+use Illuminate\Support\Str;
 use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Actions\DropDown;
 use Orchid\Screen\Actions\Link;
@@ -22,6 +23,9 @@ class PostListLayout extends Table
             TD::make('title', 'Заголовок')
                 ->sort()
                 ->cantHide(),
+
+            TD::make('text', 'Текст')
+                ->render(fn (Post $post) => Str::limit($post->text, 80)),
 
             TD::make('user.name', 'Автор')
                 ->render(fn (Post $post) => $post->user->name),
