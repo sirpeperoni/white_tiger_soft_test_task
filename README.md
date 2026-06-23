@@ -20,6 +20,15 @@ REST API на Laravel 13 + административная панель на Or
 docker-compose up --build
 ```
 
+Администратор создаётся автоматически:
+
+| Поле | Значение |
+|---|---|
+| Email | `admin@example.com` |
+| Пароль | `password` |
+
+Изменить данные можно в `docker-compose.yml` в переменных `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`.
+
 ---
 
 ## Локальный запуск
